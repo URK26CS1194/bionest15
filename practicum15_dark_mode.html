@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioNest - Dark Mode</title>
+<style>
+  :root {                       /* Light theme (default) */
+    --bg:#f5f7f1; --text:#1d2b22; --card:#ffffff; --border:#d8dfd2;
+    --nav:#2e5a3c; --nav-text:#ffffff; --accent:#7fb069; --accent-text:#1d2b22;
+  }
+  [data-theme="dark"] {         /* Dark theme */
+    --bg:#101a14; --text:#e4eee6; --card:#1a2a21; --border:#2c4636;
+    --nav:#0b130e; --nav-text:#e4eee6; --accent:#8fd16f; --accent-text:#0b130e;
+  }
+  body { margin:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--text); transition: background .3s, color .3s; }
+  nav { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; background:var(--nav); color:var(--nav-text); padding:12px 20px; }
+  nav h1 { margin:0; font-size:22px; }
+  .toggles button { padding:7px 12px; margin-left:6px; border:1px solid var(--accent); border-radius:4px; background:transparent; color:var(--nav-text); cursor:pointer; }
+  .toggles button.on { background:var(--accent); color:var(--accent-text); }
+  main { max-width:900px; margin:0 auto; padding:20px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; transition: background .3s, border-color .3s; }
+  .card h3 { margin-top:0; }
+  .tag { display:inline-block; background:var(--accent); color:var(--accent-text); padding:2px 8px; border-radius:10px; font-size:12px; }
+  #modeLabel { margin-top:18px; font-size:14px; opacity:.8; }
+</style>
+</head>
+<body>
+<nav>
+  <h1>BioNest</h1>
+  <div class="toggles">
+    <button id="lightBtn" type="button" onclick="setTheme('light')">Light</button>
+    <button id="darkBtn" type="button" onclick="setTheme('dark')">Dark</button>
+    <button id="autoBtn" type="button" onclick="setTheme('auto')">System</button>
+  </div>
+</nav>
+
+<main>
+  <h2>Biodegradable packaging solutions</h2>
+  <div class="grid">
+    <article class="card"><span class="tag">Mailers</span><h3>Compostable Mailers</h3><p>Waterproof, tear-resistant and made to compost.</p></article>
+    <article class="card"><span class="tag">Food</span><h3>Plant-based Food Boxes</h3><p>Grease-resistant boxes for hot and cold takeaway.</p></article>
+    <article class="card"><span class="tag">Trays</span><h3>Molded Fibre Trays</h3><p>Plant fibre trays with no plastic coating.</p></article>
+  </div>
+  <p id="modeLabel"></p>
+</main>
+
+<script>
+  const root = document.documentElement;
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+  function applyTheme(mode) {                       // mode is "light" or "dark"
+    if (mode === "dark") root.setAttribute("data-theme", "dark");
+    else root.removeAttribute("data-theme");
+  }
+
+  function setTheme(choice) {                       // choice is "light", "dark" or "auto"
+    try { localStorage.setItem("bionestTheme", choice); } catch (e) {}
+    const mode = choice === "auto" ? (media.matches ? "dark" : "light") : choice;
+    applyTheme(mode);
+    document.querySelectorAll(".toggles button").forEach(b => b.classList.remove("on"));
+    document.getElementById(choice === "auto" ? "autoBtn" : choice + "Btn").classList.add("on");
+    document.getElementById("modeLabel").textContent =
+      "Theme: " + (choice === "auto" ? "System (" + mode + ")" : choice);
+  }
+
+  // On load: use the saved choice; first-time visitors follow the system setting
+  let saved = null;
+  try { saved = localStorage.getItem("bionestTheme"); } catch (e) {}
+  setTheme(saved || "auto");
+
+  // If the system theme changes while "System" is selected, follow it immediately
+  media.addEventListener("change", () => {
+    let current = null;
+    try { current = localStorage.getItem("bionestTheme"); } catch (e) {}
+    if (!current || current === "auto") setTheme("auto");
+  });
+</script>
+</body>
+</html>
